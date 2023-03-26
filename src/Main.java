@@ -126,7 +126,7 @@ public class Main extends Application{
                 return;
             
             if (hasBomb){
-                System.out.println("Game over");
+                System.out.println("Haz perdido");
             }
             isOpen = true;
             text.setVisible(true);
