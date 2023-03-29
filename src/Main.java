@@ -48,7 +48,6 @@ public class Main extends Application{
     
         //Despliege en pantalla de las bombas que se deben encontrar y las encontradas
         
-      
         for (int y = 0; y < Y_TILE; y++ ){
             for(int x = 0; x < X_TILE; x++){
                 Tile tile = new Tile(x, y, Math.random() < 0.2);
@@ -58,13 +57,13 @@ public class Main extends Application{
                 
                 if (tile.hasBomb){
                     bombCount++;
-                }
-                
-            }
-            
+                }   
+            }   
         }
+        
+        
         System.out.println("Number of bombs: " + bombCount);
-        bombsMarked.setText("Bombs Marked: 0/" + bombCount);
+        bombsMarked.setText("Bombas encontradas: 0/" + bombCount);
         bombsMarked.setTranslateX(320);
         bombsMarked.setTranslateY(20);
         root.getChildren().add(bombsMarked);
@@ -159,7 +158,7 @@ public class Main extends Application{
                 if (e.getButton()== MouseButton.SECONDARY){
                     if (isMarked) {
                         // Desmarcar la celda
-                        border.setFill(null);
+                        border.setFill(Color.BLACK);
                         isMarked = false;
                         bombsMarkedCount--;
                     } else {
@@ -167,12 +166,15 @@ public class Main extends Application{
                         border.setFill(Color.RED);
                         isMarked = true;
                         bombsMarkedCount++;
+                        String[] args = null;
+                        LED.main(args);
                     }
-                    
-                    bombsMarked.setText("Bombs Marked: " + bombsMarkedCount + "/" + bombCount);
+
+                    bombsMarked.setText("Bombas encontradas" + bombsMarkedCount + "/" + bombCount);
                 }
             });
         }
+        
         
         public void open(){
             if (isOpen)
