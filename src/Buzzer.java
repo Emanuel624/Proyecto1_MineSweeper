@@ -1,6 +1,7 @@
+
 import com.fazecast.jSerialComm.*;
 
-public class LED {
+public class Buzzer {
     public static void main(String[] args) {
         SerialPort[] ports = SerialPort.getCommPorts();
         SerialPort port = ports[0]; // selecciona el primer puerto serie disponible
@@ -11,7 +12,7 @@ public class LED {
 
             return;
         }
-        
+
         port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0); // Configura los tiempos de espera
 
         try {
@@ -20,7 +21,7 @@ public class LED {
             e.printStackTrace();
         }
 
-        port.writeBytes("H".getBytes(), 1); // Envia el carácter 'H' para encender la LED
+        port.writeBytes("1".getBytes(), 1); // Envia el carácter 'H' para encender la LED
 
         try {
             Thread.sleep(1000); // Espera 1 segundos antes de apagar la LED
@@ -28,10 +29,15 @@ public class LED {
             e.printStackTrace();
         }
         
-        port.writeBytes("L".getBytes(), 1); // Envia el carácter 'L' para apagar la LED
+        port.writeBytes("0".getBytes(), 1); // Envia el carácter 'L' para apagar la LED
 
         port.closePort(); // Cierra el puerto serie
     }
 }
 
+
+    
+
+
+    
 

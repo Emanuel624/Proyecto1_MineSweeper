@@ -152,6 +152,8 @@ public class Main extends Application{
             setOnMouseClicked(e -> {
                 if (e.getButton() == MouseButton.PRIMARY){
                     open();
+                    String[] args = null;
+                    Buzzer.main(args);
                 }
                 
                 //Lógica para contar la cantidad de bombas que se han marcado y las que faltan
