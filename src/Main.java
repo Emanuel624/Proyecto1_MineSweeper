@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 import java.util.Random;
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -34,6 +35,8 @@ public class Main extends Application{
     private int bombsToMark;
     private int bombsMarkedCount = 0;
     int bombCount = 0;
+    
+    Button JoyStick;
 
     
     //Creación de la matriz en la que se basa el tablero
@@ -83,7 +86,17 @@ public class Main extends Application{
             }
         }
         
-        StackPane stackPane = new StackPane(root, timeElapsed);
+        //Botón para la funcionalidad del Joystick
+        JoyStick = new Button();
+        JoyStick.setText("Juega con JoyStick");
+        JoyStick.setOnAction(events ->{
+            
+        });
+        JoyStick.setTranslateX(0);
+        JoyStick.setTranslateY(-150);
+        
+        //Colocar items en la GUI
+        StackPane stackPane = new StackPane(root, timeElapsed, JoyStick);
         stackPane.setPrefSize(800, 600);
         
         return stackPane;
@@ -125,6 +138,8 @@ public class Main extends Application{
         private boolean hasBomb;
         private boolean isOpen = false;
         
+            
+        
         private boolean isMarked = false;
         
         
@@ -152,8 +167,13 @@ public class Main extends Application{
             setOnMouseClicked(e -> {
                 if (e.getButton() == MouseButton.PRIMARY){
                     open();
-                    String[] args = null;
-                    Buzzer.main(args);
+                    if (hasBomb){
+                        String[] args = null;
+                        Buzzer_Bomba.main(args);
+                    }else{
+                        String[] args = null;
+                        Buzzer.main(args);
+                    }
                 }
                 
                 //Lógica para contar la cantidad de bombas que se han marcado y las que faltan
@@ -180,10 +200,13 @@ public class Main extends Application{
         
         public void open(){
             if (isOpen)
-                return;
+                return;   
+            
+                
             
             if (hasBomb){
                 System.out.println("Haz perdido");
+
             }
             isOpen = true;
             text.setVisible(true);
@@ -204,6 +227,9 @@ public class Main extends Application{
         
         //Inicialización del cronometro
         startTime = Instant.now();
+        
+
+        
         
         //Presentar el contador de bombas y de tiempo
          new AnimationTimer() {
