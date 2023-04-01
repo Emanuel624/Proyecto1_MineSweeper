@@ -5,9 +5,17 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.InputStream;
+import javafx.application.Application;
 
-public class JoyStick {
+public class Controlador {
+
     public static void main(String[] args) {
+        Thread serialThread = new Thread(Controlador::startSerialCommunication);
+        serialThread.start();
+        
+    }
+
+    private static void startSerialCommunication() {
         SerialPort serialPort = SerialPort.getCommPort("COM6"); // Reemplaza COM3 por el puerto de tu Arduino
         serialPort.setComPortParameters(9600, 8, 1, SerialPort.NO_PARITY);
         serialPort.openPort();
@@ -24,13 +32,13 @@ public class JoyStick {
                     int xValue = Integer.parseInt(values[1]);
                     int yValue = Integer.parseInt(values[2]);
                     int Left_Mouse= Integer.parseInt(values[3]);
-                    
+
                     Robot robot = new Robot();
 
                     if (xValue < 400) {
                         robot.keyPress(KeyEvent.VK_A);
                         robot.keyRelease(KeyEvent.VK_A);
-                        
+
                     } else if (xValue > 600) {
                         robot.keyPress(KeyEvent.VK_D);
                         robot.keyRelease(KeyEvent.VK_D);
@@ -43,10 +51,10 @@ public class JoyStick {
                         robot.keyPress(KeyEvent.VK_W);
                         robot.keyRelease(KeyEvent.VK_W);
                     }
-                    
+
                     if (Left_Mouse == 0){
                         robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-                        robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);     
+                        robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
                     }
                 }
             }

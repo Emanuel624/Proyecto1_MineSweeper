@@ -1,4 +1,5 @@
-
+import java.awt.AWTException;
+import java.awt.Robot;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -8,10 +9,13 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import java.util.Random;
+
 import javafx.animation.AnimationTimer;
-import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import static javafx.scene.input.KeyCode.A;
+import static javafx.scene.input.KeyCode.D;
+import static javafx.scene.input.KeyCode.S;
+import static javafx.scene.input.KeyCode.W;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -36,15 +40,21 @@ public class Main extends Application{
     private int bombsMarkedCount = 0;
     int bombCount = 0;
     
+    //Boton para jugar con el Joystick
     Button JoyStick;
+    
+    //Logica prueba
+    private Robot robot;
 
+    private double mouseX = 0;
+    private double mouseY = 0;
     
     //Creación de la matriz en la que se basa el tablero
     private Tile [][] grid = new Tile [X_TILE][Y_TILE];
     
     
     //Lógica basica detras del juego
-    private Parent createContent(){
+    private Parent createContent() throws AWTException{
         Pane root = new Pane();
         
         root.setPrefSize(X_TILE * TILE_SIZE, Y_TILE * TILE_SIZE);
@@ -63,8 +73,7 @@ public class Main extends Application{
                 }   
             }   
         }
-        
-        
+          
         System.out.println("Number of bombs: " + bombCount);
         bombsMarked.setText("Bombas encontradas: 0/" + bombCount);
         bombsMarked.setTranslateX(320);
@@ -89,18 +98,18 @@ public class Main extends Application{
         //Botón para la funcionalidad del Joystick
         JoyStick = new Button();
         JoyStick.setText("Juega con JoyStick");
-        JoyStick.setOnAction(events ->{
-            
-        });
+
         JoyStick.setTranslateX(0);
         JoyStick.setTranslateY(-150);
+            
         
-        //Colocar items en la GUI
+                //Colocar items en la GUI
         StackPane stackPane = new StackPane(root, timeElapsed, JoyStick);
         stackPane.setPrefSize(800, 600);
         
         return stackPane;
-    }
+    } 
+      
     
     //Conocer que si las celdas cercanas tienen bombas
     private List<Tile> getNeighbors(Tile tile){
@@ -148,6 +157,7 @@ public class Main extends Application{
         
         
         public Tile(int x, int y, boolean hasBomb){
+                        
             this.x = x;
             this.y = y;
             this.hasBomb = hasBomb;
@@ -163,6 +173,7 @@ public class Main extends Application{
             
             setTranslateX(x * TILE_SIZE);
             setTranslateY(y * TILE_SIZE);
+               
             
             setOnMouseClicked(e -> {
                 if (e.getButton() == MouseButton.PRIMARY){
@@ -195,9 +206,21 @@ public class Main extends Application{
                     bombsMarked.setText("Bombas encontradas" + bombsMarkedCount + "/" + bombCount);
                 }
             });
+          
         }
         
+        public void setSelected(boolean selected) {
+            if (selected) {
+                border.setStroke(Color.BLUE);
+                border.setStrokeWidth(3);
+            } else {
+                border.setStroke(Color.LIGHTGRAY);
+                border.setStrokeWidth(1);
+   
+            }
+        }
         
+             
         public void open(){
             if (isOpen)
                 return;   
@@ -217,6 +240,8 @@ public class Main extends Application{
         }
         
         }
+        
+        
     }
     
     
@@ -225,14 +250,39 @@ public class Main extends Application{
         
         Scene scene = new Scene(createContent());
         
+        robot = new Robot();
+        JoyStick.setOnAction(event -> {
+            String[] args = null;
+            Controlador.main(args);
+            
+            scene.setOnKeyPressed(keyEvent  -> {
+                switch (keyEvent.getCode()) {
+                    case W:
+                        mouseY -= 10;
+                        break;
+                    case S:
+                        mouseY += 10;
+                        break;
+                    case A:
+                        mouseX -= 10;
+                        break;
+                    case D:
+                        mouseX += 10;
+                        break;
+                }
+            robot.mouseMove((int) mouseX, (int) mouseY);
+            });
+        });
+        
+       
         //Inicialización del cronometro
         startTime = Instant.now();
         
+      
 
-        
-        
+               
         //Presentar el contador de bombas y de tiempo
-         new AnimationTimer() {
+        new AnimationTimer() {
             @Override
             public void handle(long now) {
                 Duration duration = Duration.between(startTime, Instant.now());
@@ -264,7 +314,9 @@ public class Main extends Application{
     }
     
     public static void main(String[] args){
-        launch(args);
+        new Thread(() -> Application.launch(Main.class)).start();
     }
 }
+
+
 
