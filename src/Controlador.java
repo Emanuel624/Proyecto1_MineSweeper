@@ -1,3 +1,4 @@
+
 import com.fazecast.jSerialComm.*;
 import java.awt.AWTException;
 import java.awt.Robot;
@@ -5,14 +6,14 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.InputStream;
-import javafx.application.Application;
+import java.util.Arrays;
 
 public class Controlador {
 
     public static void main(String[] args) {
         Thread serialThread = new Thread(Controlador::startSerialCommunication);
         serialThread.start();
-        
+
     }
 
     private static void startSerialCommunication() {
@@ -26,12 +27,13 @@ public class Controlador {
                     byte[] buffer = new byte[1024];
                     int len = inputStream.read(buffer);
                     String message = new String(buffer, 0, len);
-                    System.out.print(message);
 
                     String[] values = message.trim().split("[^\\d]+");
                     int xValue = Integer.parseInt(values[1]);
                     int yValue = Integer.parseInt(values[2]);
-                    int Left_Mouse= Integer.parseInt(values[3]);
+                    int Left_Mouse = Integer.parseInt(values[3]);
+                    int Right_Mouse = Integer.parseInt(values[4]);
+                    
 
                     Robot robot = new Robot();
 
@@ -52,9 +54,13 @@ public class Controlador {
                         robot.keyRelease(KeyEvent.VK_W);
                     }
 
-                    if (Left_Mouse == 0){
+                    if (Left_Mouse == 0) {
                         robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
                         robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+                    }
+                    if (Right_Mouse == 1) {
+                        robot.mousePress(InputEvent.BUTTON3_DOWN_MASK);
+                        robot.mouseRelease(InputEvent.BUTTON3_DOWN_MASK);
                     }
                 }
             }
