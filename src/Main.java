@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -13,6 +14,8 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import static javafx.scene.input.KeyCode.A;
 import static javafx.scene.input.KeyCode.D;
@@ -45,7 +48,7 @@ public class Main extends Application{
 
         //Boton para jugar con el Joystick
         Button JoyStick;
-        
+        Button PilaSugenrencias;
 
         //Logica prueba
         private Robot robot;
@@ -55,6 +58,11 @@ public class Main extends Application{
 
         //Creación de la matriz en la que se basa el tablero
         private Tile [][] grid = new Tile [X_TILE][Y_TILE];
+        
+        
+        //Stack de sugerencias
+        private Stack<Tile> sugerencias = new Stack<>();
+        private int jugadas = 0;
 
         
         //Lógica basica detras del juego
@@ -104,10 +112,31 @@ public class Main extends Application{
 
             JoyStick.setTranslateX(0);
             JoyStick.setTranslateY(-150);
-
+            
+            
+            //Botón para mostrar las sugerencias de donde hay bombas
+            PilaSugenrencias = new Button();
+            PilaSugenrencias.setText("Pila sugerencias");
+            PilaSugenrencias.setTranslateX(-240);
+            PilaSugenrencias.setTranslateY(50);
+            PilaSugenrencias.setOnAction(e -> {
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setTitle("Pila de sugerencias");
+                alert.setHeaderText(null);
+                if (sugerencias.isEmpty()) {
+                    alert.setContentText("La pila de sugerencias está vacía.");
+                } else {
+                    String content = "";
+                    for (Tile tile : sugerencias) {
+                        content += "(" + tile.x + ", " + tile.y + ")\n";
+                    }
+                    alert.setContentText(content);
+                }
+                alert.showAndWait();
+            });
 
                     //Colocar items en la GUI
-            StackPane stackPane = new StackPane(root, timeElapsed, JoyStick);
+            StackPane stackPane = new StackPane(root, timeElapsed, JoyStick, PilaSugenrencias);
             stackPane.setPrefSize(800, 600);
 
             return stackPane;
@@ -150,15 +179,14 @@ public class Main extends Application{
             private boolean hasBomb;
             private boolean isOpen = false;
 
-
-
+            
             private boolean isMarked = false;
 
 
             private Rectangle border = new Rectangle(TILE_SIZE, TILE_SIZE);
             private Text text = new Text ();
-
-
+            
+            
             public Tile(int x, int y, boolean hasBomb){
 
                 this.x = x;
@@ -188,6 +216,11 @@ public class Main extends Application{
                             String[] args = null;
                             Buzzer.main(args);
                         }
+                        jugadas++;
+                        
+                        if (jugadas % 5 == 0) {
+                            agregarSugerencia();
+                        }
                     }
 
                     //Lógica para contar la cantidad de bombas que se han marcado y las que faltan
@@ -205,12 +238,30 @@ public class Main extends Application{
                             String[] args = null;
                             LED.main(args);
                         }
-
                         bombsMarked.setText("Bombas encontradas" + bombsMarkedCount + "/" + bombCount);
                     }
                 });
 
             }
+            
+            
+            private void agregarSugerencia() {
+                List<Tile> tiles = new ArrayList<>();
+                for (int Y = 0; Y < Y_TILE; Y++) {
+                    for (int X = 0; X < X_TILE; X++) {
+                        Tile tile = grid[X][Y];
+                        if (!tile.hasBomb && !tile.isOpen) {
+                            tiles.add(tile);
+                        }
+                    }
+                }
+                if (!tiles.isEmpty()) {
+                    Tile sugerencia = tiles.get((int) (Math.random() * tiles.size()));
+                    sugerencias.push(sugerencia);
+                    
+                }
+            }
+
 
 
             public void open(){
@@ -218,10 +269,8 @@ public class Main extends Application{
                     return;   
 
 
-
                 if (hasBomb){
                     System.out.println("Haz perdido");
-
                 }
                 isOpen = true;
                 text.setVisible(true);
@@ -240,32 +289,37 @@ public class Main extends Application{
     public void start(Stage primaryStage) throws Exception {
         // Crear botones para las diferentes dificultades
         Button easyButton = new Button("Dummy");
-        Button mediumButton = new Button("Media");
+        Button mediumButton = new Button("Solitario");
         Button hardButton = new Button("Advance");
 
         // Asignar acciones a los botones
         easyButton.setOnAction(event -> {
             try {
-                startGame(primaryStage, 8, 8, 10);
+                startGame1(primaryStage, 8, 8, 10);
             } catch (AWTException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
+        
+        
         mediumButton.setOnAction(event -> {
             try {
-                startGame(primaryStage, 16, 16, 40);
+                startGame2(primaryStage, 16, 16, 40);
             } catch (AWTException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
+        
+        
         hardButton.setOnAction(event -> {
             try {
-                startGame(primaryStage, 24, 24, 99);
+                startGame3(primaryStage, 24, 24, 99);
             } catch (AWTException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
 
+        
         // Crear layout para los botones
         VBox layout = new VBox(20, easyButton, mediumButton, hardButton);
         layout.setAlignment(Pos.CENTER);
@@ -276,11 +330,12 @@ public class Main extends Application{
         primaryStage.show();
     }
     
-    private void startGame(Stage primaryStage, int xTile, int yTile, int bombCount) throws AWTException {
+    //Llama a la logica del nivel Dummy --> aun en desarrollo
+    private void startGame1(Stage primaryStage, int xTile, int yTile, int bombCount) throws AWTException {
         // Crear contenido para el juego
         Scene scene = new Scene(createContent(xTile, yTile, bombCount));
         robot = new Robot();
-
+        
         // Asignar acciones al joystick y a las teclas
         JoyStick.setOnAction(event -> {
             String[] args = null;
@@ -337,11 +392,146 @@ public class Main extends Application{
                 }
             }
         }.start();
-
+        
         // Mostrar escena del juego
         primaryStage.setScene(scene);
     }
 
+    
+        //Llama a la logica del nivel Solo
+        private void startGame2(Stage primaryStage, int xTile, int yTile, int bombCount) throws AWTException {
+        // Crear contenido para el juego
+        Scene scene = new Scene(createContent(xTile, yTile, bombCount));
+        robot = new Robot();
+        
+        // Asignar acciones al joystick y a las teclas
+        JoyStick.setOnAction(event -> {
+            String[] args = null;
+            Controlador.main(args);
+
+            scene.setOnKeyPressed(keyEvent -> {
+                switch (keyEvent.getCode()) {
+                    case W:
+                        mouseY -= 10;
+                        break;
+                    case S:
+                        mouseY += 10;
+                        break;
+                    case A:
+                        mouseX -= 10;
+                        break;
+                    case D:
+                        mouseX += 10;
+                        break;
+                }
+                robot.mouseMove((int) mouseX, (int) mouseY);
+            });
+
+        });
+
+        // Inicialización del cronómetro
+        startTime = Instant.now();
+
+        // Presentar el contador de bombas y de tiempo
+        new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                Duration duration = Duration.between(startTime, Instant.now());
+                long seconds = duration.getSeconds();
+                timeElapsed.setText("Tiempo de juego: " + seconds + " segundos");
+
+                if (bombsMarkedCount == bombCount) {
+                    // Check if the user has won the game
+                    boolean allOpened = true;
+                    for (int y = 0; y < yTile; y++) {
+                        for (int x = 0; x < xTile; x++) {
+                            Tile tile = grid[x][y];
+                            if (tile.hasBomb && !tile.isMarked) {
+                                allOpened = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (allOpened) {
+                        System.out.println("You won!");
+                        // Stop the timer when the user wins
+                        this.stop();
+                    }
+                }
+            }
+        }.start();
+        
+        // Mostrar escena del juego
+        primaryStage.setScene(scene);
+    }
+        
+    
+    //Llama a la logica del nivel Advance --> aun en desarrollo    
+    private void startGame3(Stage primaryStage, int xTile, int yTile, int bombCount) throws AWTException {
+        // Crear contenido para el juego
+        Scene scene = new Scene(createContent(xTile, yTile, bombCount));
+        robot = new Robot();
+        
+        // Asignar acciones al joystick y a las teclas
+        JoyStick.setOnAction(event -> {
+            String[] args = null;
+            Controlador.main(args);
+
+            scene.setOnKeyPressed(keyEvent -> {
+                switch (keyEvent.getCode()) {
+                    case W:
+                        mouseY -= 10;
+                        break;
+                    case S:
+                        mouseY += 10;
+                        break;
+                    case A:
+                        mouseX -= 10;
+                        break;
+                    case D:
+                        mouseX += 10;
+                        break;
+                }
+                robot.mouseMove((int) mouseX, (int) mouseY);
+            });
+
+        });
+
+        // Inicialización del cronómetro
+        startTime = Instant.now();
+
+        // Presentar el contador de bombas y de tiempo
+        new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                Duration duration = Duration.between(startTime, Instant.now());
+                long seconds = duration.getSeconds();
+                timeElapsed.setText("Tiempo de juego: " + seconds + " segundos");
+
+                if (bombsMarkedCount == bombCount) {
+                    // Check if the user has won the game
+                    boolean allOpened = true;
+                    for (int y = 0; y < yTile; y++) {
+                        for (int x = 0; x < xTile; x++) {
+                            Tile tile = grid[x][y];
+                            if (tile.hasBomb && !tile.isMarked) {
+                                allOpened = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (allOpened) {
+                        System.out.println("You won!");
+                        // Stop the timer when the user wins
+                        this.stop();
+                    }
+                }
+            }
+        }.start();
+        
+        // Mostrar escena del juego
+        primaryStage.setScene(scene);
+    }
 
         public static void main(String[] args){
             new Thread(() -> Application.launch(Main.class)).start();
