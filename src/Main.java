@@ -31,7 +31,7 @@ import javafx.scene.text.Text;
 
 public class Main extends Application{
     
-        //Escala del tablero po generar
+        //Escala del tablero por generar
         private static final int TILE_SIZE = 40;
         private static final int X_TILE = 8;
         private static final int Y_TILE = 8;
@@ -65,6 +65,8 @@ public class Main extends Application{
         private int jugadas = 0;
 
         
+        
+        ////////////////////////////////////////////////////////////////////////Lógica del Nivel Solitario/////////////////////////////////////////////////////////////////////////
         //Lógica basica detras del juego
         private Parent createContent(int xTile, int yTile, int bombCount1) throws AWTException{
             Pane root = new Pane();
@@ -221,6 +223,19 @@ public class Main extends Application{
                         if (jugadas % 5 == 0) {
                             agregarSugerencia();
                         }
+                        
+                        
+                        //Detección de cada jugada del usuario, para dar el turno al computador
+                        if (jugadas % 2 == 0) {
+                            Tile randomTile = getRandomTile();
+                            randomTile.open();
+                            
+                        }
+                        
+                        if (jugadas % 2 != 0) {
+                            Tile randomTile = getRandomTile();
+                            randomTile.open();
+                        }
                     }
 
                     //Lógica para contar la cantidad de bombas que se han marcado y las que faltan
@@ -261,7 +276,23 @@ public class Main extends Application{
                     
                 }
             }
-
+            
+            //Lógica para nivel dummy
+            private Tile getRandomTile() {
+                List<Tile> tiles = new ArrayList<>();
+                for (int Y = 0; Y < Y_TILE; Y++) {
+                    for (int X = 0; X < X_TILE; X++) {
+                        Tile tile = grid[X][Y];
+                        if (!tile.isOpen) {
+                            tiles.add(tile);                         
+                        }
+                    }
+                }
+                Tile randomTile = tiles.get((int) (Math.random() * tiles.size()));
+                randomTile.border.setStroke(Color.RED); // Cambiar el color del borde
+                randomTile.border.setStrokeWidth(3);
+                return randomTile;
+            }
 
 
             public void open(){
@@ -278,11 +309,92 @@ public class Main extends Application{
 
                 if (text.getText().isEmpty()){
                     getNeighbors(this).forEach(Tile::open);
+                }   
             }
-
-            }
-
         }
+////////////////////////////////////////////////////////////////////////////////Fin codigo Solitario///////////////////////////////////////////////////////////////////////////
+
+        
+////////////////////////////////////////////////////////////////////////////////Lógica del Nivel Dummy/////////////////////////////////////////////////////////////////////////
+        //Lógica basica detras del juego
+        private Parent createContentDummy(int xTile, int yTile, int bombCount1) throws AWTException{
+            Pane root = new Pane();
+
+            root.setPrefSize(X_TILE * TILE_SIZE, Y_TILE * TILE_SIZE);
+
+            //Despliege en pantalla de las bombas que se deben encontrar y las encontradas
+
+            for (int y = 0; y < Y_TILE; y++ ){
+                for(int x = 0; x < X_TILE; x++){
+                    Tile tile = new Tile(x, y, Math.random() < 0.2);
+
+                    grid[x][y] = tile;
+                    root.getChildren().add(tile);
+
+                    if (tile.hasBomb){
+                        bombCount++;
+                    }   
+                }   
+            }
+
+            System.out.println("Number of bombs: " + bombCount);
+            bombsMarked.setText("Bombas encontradas: 0/" + bombCount);
+            bombsMarked.setTranslateX(320);
+            bombsMarked.setTranslateY(20);
+            root.getChildren().add(bombsMarked);
+
+            for (int y = 0; y < Y_TILE; y++ ){
+                for(int x = 0; x < X_TILE; x++){
+                    Tile tile = grid[x][y];
+                    if (tile.hasBomb)
+                        continue;
+
+                    //set bombs
+                    long bombs = getNeighbors(tile).stream().filter(t -> t.hasBomb).count();
+
+                    if (bombs > 0)
+                        tile.text.setText(String.valueOf(bombs));
+                }
+            }
+
+            //Botón para la funcionalidad del Joystick
+            JoyStick = new Button();
+            JoyStick.setText("Juega con JoyStick");
+
+            JoyStick.setTranslateX(0);
+            JoyStick.setTranslateY(-150);
+            
+            
+            //Botón para mostrar las sugerencias de donde hay bombas
+            PilaSugenrencias = new Button();
+            PilaSugenrencias.setText("Pila sugerencias");
+            PilaSugenrencias.setTranslateX(-240);
+            PilaSugenrencias.setTranslateY(50);
+            PilaSugenrencias.setOnAction(e -> {
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setTitle("Pila de sugerencias");
+                alert.setHeaderText(null);
+                if (sugerencias.isEmpty()) {
+                    alert.setContentText("La pila de sugerencias está vacía.");
+                } else {
+                    String content = "";
+                    for (Tile tile : sugerencias) {
+                        content += "(" + tile.x + ", " + tile.y + ")\n";
+                    }
+                    alert.setContentText(content);
+                }
+                alert.showAndWait();
+            });
+                    
+                    //Colocar items en la GUI
+            StackPane stackPane = new StackPane(root, timeElapsed, JoyStick, PilaSugenrencias);
+            stackPane.setPrefSize(800, 600);
+
+            return stackPane;
+        }            
+    ////////////////////////////////////////////////////////////////////////////Temina Lógica para el nivel dummy///////////////////////////////////////////////    
+        
+        
         
     //Analizar bien este codigo, es clave.
     @Override
@@ -332,8 +444,9 @@ public class Main extends Application{
     
     //Llama a la logica del nivel Dummy --> aun en desarrollo
     private void startGame1(Stage primaryStage, int xTile, int yTile, int bombCount) throws AWTException {
+        
         // Crear contenido para el juego
-        Scene scene = new Scene(createContent(xTile, yTile, bombCount));
+        Scene scene = new Scene(createContentDummy(xTile, yTile, bombCount));
         robot = new Robot();
         
         // Asignar acciones al joystick y a las teclas
@@ -363,7 +476,7 @@ public class Main extends Application{
 
         // Inicialización del cronómetro
         startTime = Instant.now();
-
+        
         // Presentar el contador de bombas y de tiempo
         new AnimationTimer() {
             @Override
