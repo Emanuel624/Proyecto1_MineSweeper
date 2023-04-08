@@ -66,8 +66,10 @@ public class AdvanceLevel extends Application{
 
         //Creación de lista enlazada
         private LinkedList<Tile> availableCells;
-        private LinkedList<Tile> listaSegura;
-        private LinkedList<Tile> listaIncertidumbre;
+        // Crear listas segura e incertidumbre
+        LinkedList<Tile> listaSegura = new LinkedList<>();
+        LinkedList<Tile> listaIncertidumbre = new LinkedList<>();
+        LinkedList<Tile> celdasAbiertas = new LinkedList<>();
         
         
         //Lógica basica detras del juego
@@ -151,7 +153,11 @@ public class AdvanceLevel extends Application{
                     }
                 }
             }
-            
+            // Imprimir el estado de la lista enlazada en la consola
+            System.out.println("Lista general sin modificaciones:");
+            for (Tile tile : availableCells) {
+                System.out.println(tile);
+            }
             
             //Colocar items en la GUI
             StackPane stackPane = new StackPane(root, timeElapsed, JoyStick, PilaSugenrencias);
@@ -244,7 +250,7 @@ public class AdvanceLevel extends Application{
                         
                         // Lógica todas las celdas disponibles que no estan abiertas se meten dentro de la lista enlazada 
                         // eliminar las celdas abiertas de la lista de celdas disponibles
-                        LinkedList<Tile> celdasAbiertas = new LinkedList<>();
+                        
                         for (int j = 0; j < Y_TILE; j++) {
                             for (int i = 0; i < X_TILE; i++) {
                                 Tile tile = grid[i][j];
@@ -255,13 +261,44 @@ public class AdvanceLevel extends Application{
                         }
                         availableCells.removeAll(celdasAbiertas);
 
+                                                
+                        
+                        // Generar un índice aleatorio para acceder a una celda de availableCells
+                        Random rand = new Random();
+                        int randomIndex = rand.nextInt(availableCells.size());
+                        Tile randomTile = availableCells.get(randomIndex);
+
+                        // Determinar si hay una mina en la celda aleatoria
+                        if (randomTile.hasBomb) {
+                            listaIncertidumbre.add(randomTile);
+                            
+                        } else {
+                            listaSegura.add(randomTile);
+                            
+                        }
+                        
+                        availableCells.remove(randomTile);
+                        
                         // Imprimir el estado de la lista enlazada en la consola
                         System.out.println("Lista general:");
                         for (Tile tile : availableCells) {
                             System.out.println(tile);
                         }
                         
+                        // Imprimir el estado de las listas segura e incertidumbre en la consola
+                        System.out.println("Lista segura:");
+                        for (Tile tile : listaSegura) {
+                            System.out.println(tile);
+                        }
+
+                        System.out.println("Lista incertidumbre:");
+                        for (Tile tile : listaIncertidumbre) {
+                            System.out.println(tile);
+                        }
                         
+                        
+
+                           
                     }
 
                     //Lógica para contar la cantidad de bombas que se han marcado y las que faltan
@@ -290,6 +327,13 @@ public class AdvanceLevel extends Application{
                 public String toString() {
                     return String.format("(%d,%d)", x, y);
                 }
+            
+            // Método para imprimir una lista de celdas
+            private void printList(LinkedList<Tile> list) {
+                for (Tile tile : list) {
+                    System.out.println(tile);
+                }
+            }    
                 
             private void agregarSugerencia() {
                 List<Tile> tiles = new ArrayList<>();
