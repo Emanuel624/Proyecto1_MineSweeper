@@ -3,7 +3,9 @@ import java.awt.Robot;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.Stack;
 import javafx.application.Application;
 import javafx.scene.Parent;
@@ -24,6 +26,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import static javax.management.Query.value;
 
 
 public class AdvanceLevel extends Application{
@@ -61,9 +64,12 @@ public class AdvanceLevel extends Application{
         private Stack<Tile> sugerencias = new Stack<>();
         private int jugadas = 0;
 
+        //Creación de lista enlazada
+        private LinkedList<Tile> availableCells;
+        private LinkedList<Tile> listaSegura;
+        private LinkedList<Tile> listaIncertidumbre;
         
         
-        ////////////////////////////////////////////////////////////////////////Lógica del Nivel Solitario/////////////////////////////////////////////////////////////////////////
         //Lógica basica detras del juego
         Parent createContent() throws AWTException{
             Pane root = new Pane();
@@ -84,8 +90,7 @@ public class AdvanceLevel extends Application{
                     }   
                 }   
             }
-
-            System.out.println("Number of bombs: " + bombCount);
+            
             bombsMarked.setText("Bombas encontradas: 0/" + bombCount);
             bombsMarked.setTranslateX(320);
             bombsMarked.setTranslateY(20);
@@ -133,8 +138,22 @@ public class AdvanceLevel extends Application{
                 }
                 alert.showAndWait();
             });
-
-                    //Colocar items en la GUI
+            
+            
+            // Crear la lista enlazada
+            availableCells = new LinkedList<>();
+            // Agregar todas las celdas disponibles a la lista enlazada
+            for (int y = 0; y < Y_TILE; y++) {
+                for (int x = 0; x < X_TILE; x++) {
+                    Tile tile = grid[x][y];
+                    if (!tile.isOpen) {
+                        availableCells.add(tile);
+                    }
+                }
+            }
+            
+            
+            //Colocar items en la GUI
             StackPane stackPane = new StackPane(root, timeElapsed, JoyStick, PilaSugenrencias);
             stackPane.setPrefSize(800, 600);
 
@@ -184,6 +203,7 @@ public class AdvanceLevel extends Application{
 
             private Rectangle border = new Rectangle(TILE_SIZE, TILE_SIZE);
             private Text text = new Text ();
+
             
             
             public Tile(int x, int y, boolean hasBomb){
@@ -192,7 +212,7 @@ public class AdvanceLevel extends Application{
                 this.y = y;
                 this.hasBomb = hasBomb;
 
-
+                
                 border.setStroke(Color.LIGHTGRAY);
 
 
@@ -222,17 +242,26 @@ public class AdvanceLevel extends Application{
                         }
                         
                         
-                        //Detección de cada jugada del usuario, para dar el turno al computador
-                        if (jugadas % 2 == 0) {
-                            Tile randomTile = getRandomTile();
-                            randomTile.open();
-                            
+                        // Lógica todas las celdas disponibles que no estan abiertas se meten dentro de la lista enlazada 
+                        // eliminar las celdas abiertas de la lista de celdas disponibles
+                        LinkedList<Tile> celdasAbiertas = new LinkedList<>();
+                        for (int j = 0; j < Y_TILE; j++) {
+                            for (int i = 0; i < X_TILE; i++) {
+                                Tile tile = grid[i][j];
+                                if (tile.isOpen|| tile.text.isVisible())  {
+                                    celdasAbiertas.add(tile);
+                                }
+                            }
+                        }
+                        availableCells.removeAll(celdasAbiertas);
+
+                        // Imprimir el estado de la lista enlazada en la consola
+                        System.out.println("Lista general:");
+                        for (Tile tile : availableCells) {
+                            System.out.println(tile);
                         }
                         
-                        if (jugadas % 2 != 0) {
-                            Tile randomTile = getRandomTile();
-                            randomTile.open();
-                        }
+                        
                     }
 
                     //Lógica para contar la cantidad de bombas que se han marcado y las que faltan
@@ -253,10 +282,15 @@ public class AdvanceLevel extends Application{
                         bombsMarked.setText("Bombas encontradas" + bombsMarkedCount + "/" + bombCount);
                     }
                 });
-
             }
             
             
+            //Codigo necesario para poder ver los valores de la lista enlazada en forma de string
+            @Override
+                public String toString() {
+                    return String.format("(%d,%d)", x, y);
+                }
+                
             private void agregarSugerencia() {
                 List<Tile> tiles = new ArrayList<>();
                 for (int Y = 0; Y < Y_TILE; Y++) {
@@ -274,24 +308,6 @@ public class AdvanceLevel extends Application{
                 }
             }
             
-            //Lógica para nivel dummy
-            private Tile getRandomTile() {
-                List<Tile> tiles = new ArrayList<>();
-                for (int Y = 0; Y < Y_TILE; Y++) {
-                    for (int X = 0; X < X_TILE; X++) {
-                        Tile tile = grid[X][Y];
-                        if (!tile.isOpen) {
-                            tiles.add(tile);                         
-                        }
-                    }
-                }
-                Tile randomTile = tiles.get((int) (Math.random() * tiles.size()));
-                randomTile.border.setStroke(Color.RED); // Cambiar el color del borde
-                randomTile.border.setStrokeWidth(3);
-                return randomTile;
-            }
-
-
             public void open(){
                 if (isOpen)
                     return;   
@@ -316,6 +332,7 @@ public class AdvanceLevel extends Application{
 
         Scene scene = new Scene(createContent());
 
+        
         robot = new Robot();
         JoyStick.setOnAction(event -> {
             String[] args = null;

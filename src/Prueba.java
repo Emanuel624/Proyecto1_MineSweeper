@@ -1,41 +1,20 @@
-import java.awt.AWTException;
-import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
+import java.util.LinkedList;
 
-public class Prueba extends Application {
-
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        // Crear un botón
-        Button startButton = new Button("Iniciar Solitario");
-        
-        // Acción al presionar el botón
-        startButton.setOnAction((ActionEvent event) -> {
-            Solitario solitario = new Solitario();
-            try {
-                primaryStage.setScene(new Scene(solitario.createContent()));
-                primaryStage.show();
-            } catch (AWTException e) {
-                e.printStackTrace();
-            }
-        });
-        
-        // Añadir el botón a una disposición
-        StackPane root = new StackPane();
-        root.getChildren().add(startButton);
-        
-        // Mostrar la escena
-        Scene scene = new Scene(root, 300, 250);
-        primaryStage.setTitle("Solitario");
-        primaryStage.setScene(scene);
-        primaryStage.show();
-    }
-
+public class Prueba {
     public static void main(String[] args) {
-        launch(args);
+        // Crear una lista enlazada de enteros
+        LinkedList<Integer> linkedList = new LinkedList<>();
+
+        // Agregar elementos a la lista
+        linkedList.add(1);
+        linkedList.add(2);
+        linkedList.add(3);
+        linkedList.add(4);
+        linkedList.add(5);
+
+        // Recorrer la lista e imprimir sus elementos
+        for (int i = 0; i < linkedList.size(); i++) {
+            System.out.println(linkedList.get(i));
+        }
     }
 }
