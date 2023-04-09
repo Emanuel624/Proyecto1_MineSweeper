@@ -26,7 +26,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
-import static javax.management.Query.value;
+
 
 
 public class AdvanceLevel extends Application{
@@ -159,6 +159,17 @@ public class AdvanceLevel extends Application{
                 System.out.println(tile);
             }
             
+            // Imprimir el estado de las listas segura e incertidumbre en la consola
+            System.out.println("Lista segura:");
+            for (Tile tile : listaSegura) {
+                System.out.println(tile);
+            }
+
+            System.out.println("Lista incertidumbre:");
+                for (Tile tile : listaIncertidumbre) {
+                    System.out.println(tile);
+            }
+            
             //Colocar items en la GUI
             StackPane stackPane = new StackPane(root, timeElapsed, JoyStick, PilaSugenrencias);
             stackPane.setPrefSize(800, 600);
@@ -231,6 +242,7 @@ public class AdvanceLevel extends Application{
                 setTranslateY(y * TILE_SIZE);
 
 
+                //Se juntan los procesos relacionadods al click derecho e izquierdo
                 setOnMouseClicked(e -> {
                     if (e.getButton() == MouseButton.PRIMARY){
                         open();
@@ -276,7 +288,6 @@ public class AdvanceLevel extends Application{
                             listaSegura.add(randomTile);
                             
                         }
-                        
                         availableCells.remove(randomTile);
                         
                         // Imprimir el estado de la lista enlazada en la consola
@@ -297,10 +308,43 @@ public class AdvanceLevel extends Application{
                         }
                         
                         
+                        // Seleccionar la siguiente celda a abrir
+                        Tile nextTile = null;
+                        if (!listaSegura.isEmpty()) {
+                            // Si la lista segura no está vacía, seleccionar la última celda agregada a la lista
+                            nextTile = listaSegura.get(listaSegura.size()-1);
+                        } else if (!listaIncertidumbre.isEmpty()) {
+                            // Si la lista segura está vacía pero la lista incertidumbre no, seleccionar la última celda agregada a la lista
+                            nextTile = listaIncertidumbre.get(listaIncertidumbre.size()-1);
+                        }
 
-                           
+                        
+                        
+
+                            // Si se usaron todos los elementos de la lista segura, usar la lista de incertidumbre
+                        if (nextTile == null && !listaSegura.isEmpty() && !listaIncertidumbre.isEmpty()) {
+                            listaSegura.addAll(listaIncertidumbre);
+                            listaIncertidumbre.clear();
+                            nextTile = listaSegura.get(listaSegura.size()-1);
+                        }
+
+                        
+                        // Si se seleccionó una celda, abrirla en el tablero de juego
+                        if (nextTile != null) {
+                            nextTile.open();
+                            nextTile.border.setStroke(Color.GREEN);
+                            nextTile.border.setStrokeWidth(4);
+                        }
+                        
+                        // Eliminar la celda de la lista segura o incertidumbre
+                        if (listaSegura.contains(nextTile)) {
+                            listaSegura.remove(nextTile);
+                        } else if (listaIncertidumbre.contains(nextTile)) {
+                            listaIncertidumbre.remove(nextTile);
+                        }
                     }
 
+                    
                     //Lógica para contar la cantidad de bombas que se han marcado y las que faltan
                     if (e.getButton()== MouseButton.SECONDARY){
                         if (isMarked) {
