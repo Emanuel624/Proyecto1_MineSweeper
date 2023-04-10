@@ -1,9 +1,14 @@
+/**
+ * Esta clase se encarga de tener un juego MineSweeper en el cual el computador escoge celdas de forma aletario
+ * En esta clase se contiene toda la lógica solicitida y necesariar para el funcionamiento de la clase
+ */
 import java.awt.AWTException;
 import java.awt.Robot;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Stack;
 import javafx.application.Application;
 import javafx.scene.Parent;
@@ -12,9 +17,11 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.animation.AnimationTimer;
 import static javafx.application.Application.launch;
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import static javafx.scene.input.KeyCode.A;
 import static javafx.scene.input.KeyCode.D;
 import static javafx.scene.input.KeyCode.S;
@@ -62,8 +69,10 @@ public class DummyLevel extends Application{
         private int jugadas = 0;
 
         
-        
-        ////////////////////////////////////////////////////////////////////////Lógica del Nivel Solitario/////////////////////////////////////////////////////////////////////////
+        /**
+         * @return devuelve al stackPane todos los diversos elementos añadidos a la GUI para luego ser utilizados en diversas funciones del programa. 
+         * @throws AWTException si ocurre un error al generar la interfaz del programa.AWTException
+         */
         //Lógica basica detras del juego
         Parent createContent() throws AWTException{
             Pane root = new Pane();
@@ -130,8 +139,16 @@ public class DummyLevel extends Application{
                         content += "(" + tile.x + ", " + tile.y + ")\n";
                     }
                     alert.setContentText(content);
+                    ButtonType seleccionarButton = new ButtonType("Seleccionar");
+                    alert.getButtonTypes().add(seleccionarButton);
+                    Optional<ButtonType> result = alert.showAndWait();
+                    if (result.isPresent() && result.get() == seleccionarButton) {
+                        Tile ultimaSugerencia = sugerencias.peek();
+                        ultimaSugerencia.border.setStroke(Color.AQUAMARINE);
+                        ultimaSugerencia.border.setStrokeWidth(4);
+                        ultimaSugerencia.open();                        
+                    }
                 }
-                alert.showAndWait();
             });
 
                     //Colocar items en la GUI
@@ -143,6 +160,10 @@ public class DummyLevel extends Application{
 
 
         //Conocer que si las celdas cercanas tienen bombas
+        /**
+         * @param tile utilizado para generar el tablero de juego juntos con sus bombas aleatoriamente creadas o sin bombas asociadas a la Tile.
+         * @return se retorna la información necesarias para saber que una celda reconozca que tiene bombas alrededor suyo para despues ser utilizado.
+         */
         private List<Tile> getNeighbors(Tile tile){
             List<Tile> neighbors = new ArrayList<>();
 
@@ -173,6 +194,10 @@ public class DummyLevel extends Application{
             return neighbors;
         }
 
+         /**
+         * Esta clase privada se encarga de reconocer diferentes parametros del juego tales como:
+         * si tiene bomba, si se abre la celda, si se marca como posible celda, colores de celda y bordes, etc.
+         */
         private class Tile extends StackPane{
             private int x, y;
             private boolean hasBomb;
@@ -185,7 +210,11 @@ public class DummyLevel extends Application{
             private Rectangle border = new Rectangle(TILE_SIZE, TILE_SIZE);
             private Text text = new Text ();
             
-            
+            /**
+             * @param x es la coordena en el eje "x" de la celda en cuestion por evaluar.
+             * @param y es la coordena en el eje "y" de la celda en cuestion por evaluar.
+             * @param hasBomb es el parametro booleano utilizado para saber si la celda tiene o no bomba.
+             */
             public Tile(int x, int y, boolean hasBomb){
 
                 this.x = x;
@@ -204,19 +233,32 @@ public class DummyLevel extends Application{
                 setTranslateX(x * TILE_SIZE);
                 setTranslateY(y * TILE_SIZE);
 
-
+                //Se toman las acciones obtenidas de los inputs del mouse
                 setOnMouseClicked(e -> {
-                    if (e.getButton() == MouseButton.PRIMARY){
+                    if (isOpen) {
+                        return; // Si la celda ya está abierta, no permitir interacción con ella
+                    }                    
+                    if (e.getButton() == MouseButton.PRIMARY){ //Se utilizan los imputs del click izquierdo necesarios para ejecutar la logica de este nivel Dummy
                         open();
                         if (hasBomb){
-                            String[] args = null;
+                            String[] args = null; //Se inician la comunicación de la clase con las acciones del arduino buzzer cuando tiene bomba
                             Buzzer_Bomba.main(args);
+                            Alert alert = new Alert(Alert.AlertType.ERROR);
+                            alert.setTitle("Game Over");
+                            alert.setHeaderText("Haz encontrado una bomba");
+                            alert.setContentText("¡El computador ha ganado!");  
+                            alert.showAndWait();    //Se muetra una Alert Box para notificar que el usuario encontro una bomba
+                                        
+                            //Detener el juego
+                            Platform.exit();    //Se cierra el juego despues de de cerrar esta ventan emergente
+                            
                         }else{
-                            String[] args = null;
+                            String[] args = null; //Se inician la comunicación de la clase con las acciones del arduino buzzer cuando no tiene bomba
                             Buzzer.main(args);
                         }
                         jugadas++;
                         
+                        //Se agregan el contador necesario de las jugadas realizadas por el usario 
                         if (jugadas % 5 == 0) {
                             agregarSugerencia();
                         }
@@ -226,17 +268,41 @@ public class DummyLevel extends Application{
                         if (jugadas % 2 == 0) {
                             Tile randomTile = getRandomTile();
                             randomTile.open();
-                            
+                            if (randomTile.hasBomb) {
+                                Alert alert = new Alert(Alert.AlertType.ERROR);
+                                alert.setTitle("Game Over");
+                                alert.setHeaderText("El computador he encontrado una bomba");
+                                alert.setContentText("¡Has ganado!");
+                                alert.showAndWait();    //Cuando el computador escoga una celda con bomba, se muestra una Alert box para notificar que la computadora encontro una bomba
+                                        
+                                //Detener el juego
+                                Platform.exit();    //Se cierra el juego despues de de cerrar esta ventan emergente
+                            }
                         }
-                        
+
                         if (jugadas % 2 != 0) {
                             Tile randomTile = getRandomTile();
                             randomTile.open();
+                            if (randomTile.hasBomb) {
+                                Alert alert = new Alert(Alert.AlertType.ERROR);
+                                alert.setTitle("Game Over");
+                                alert.setHeaderText("El computador he encontrado una bomba");
+                                alert.setContentText("¡Has ganado!");
+                                alert.showAndWait();    //Cuando el computador escoga una celda con bomba, se muestra una Alert box para notificar que la computadora encontro una bomba
+                                        
+                                //Detener el juego
+                                Platform.exit();    //Se cierra el juego despues de de cerrar esta ventan emergente
+                            }
                         }
                     }
 
-                    //Lógica para contar la cantidad de bombas que se han marcado y las que faltan
+                    
+                    //Lógica para contar la cantidad de bombas que se han marcado y las que faltan, ademas; de la logica para poner las "Banderas"
                     if (e.getButton()== MouseButton.SECONDARY){
+                        if (isOpen) {
+                            return; // Si la celda ya está abierta, no permitir interacción con ella
+                        }
+                        
                         if (isMarked) {
                             // Desmarcar la celda
                             border.setFill(Color.BLACK);
@@ -256,7 +322,10 @@ public class DummyLevel extends Application{
 
             }
             
-            
+            /**
+             * Este metodo se encarga de recorrer el tablero de juego o grid para dar las sugerencias pertinenetes con las especificaciones pedidas
+             * es decir que sean celdas sin bombas.
+             */
             private void agregarSugerencia() {
                 List<Tile> tiles = new ArrayList<>();
                 for (int Y = 0; Y < Y_TILE; Y++) {
@@ -269,12 +338,20 @@ public class DummyLevel extends Application{
                 }
                 if (!tiles.isEmpty()) {
                     Tile sugerencia = tiles.get((int) (Math.random() * tiles.size()));
+                    if (!sugerencias.isEmpty()) {
+                        Tile ultimaSugerencia = sugerencias.peek();
+                        while (sugerencia.x == ultimaSugerencia.x && sugerencia.y == ultimaSugerencia.y) {
+                            sugerencia = tiles.get((int) (Math.random() * tiles.size()));
+                        }
+                    }
                     sugerencias.push(sugerencia);
-                    
                 }
             }
             
-            //Lógica para nivel dummy
+            /**
+             * Esta tile privada se encarga de obtener una celda aletoriamente para luego ser abierta
+             * @return se retorna esta misma celda aleatoria
+             */
             private Tile getRandomTile() {
                 List<Tile> tiles = new ArrayList<>();
                 for (int Y = 0; Y < Y_TILE; Y++) {
@@ -291,14 +368,18 @@ public class DummyLevel extends Application{
                 return randomTile;
             }
 
-
+            
+            /**
+             * Es metodo se encarga de la lógica necesaria para "abrir" las celdas del tablero de juego
+             */
             public void open(){
                 if (isOpen)
                     return;   
 
 
                 if (hasBomb){
-                    System.out.println("Haz perdido");
+                    
+                    return;
                 }
                 isOpen = true;
                 text.setVisible(true);
@@ -310,7 +391,11 @@ public class DummyLevel extends Application{
             }
         }
    
-        
+     
+   /**
+    * @param stage es la interfaz principal del programa de este nivel de dificultad. 
+    * @throws Exception si ocurre un error al generar la interfaz del programa se utiliza este excepción.
+    */  
     @Override
     public void start(Stage stage) throws Exception{
 
@@ -320,7 +405,8 @@ public class DummyLevel extends Application{
         JoyStick.setOnAction(event -> {
             String[] args = null;
             Controlador.main(args);
-
+            
+            //Los valores de la clase Controlador son utilizados para controlar el movimiento del mouse
             scene.setOnKeyPressed(keyEvent  -> {
                 switch (keyEvent.getCode()) {
                     case W:
@@ -351,6 +437,10 @@ public class DummyLevel extends Application{
 
         //Presentar el contador de bombas y de tiempo
         new AnimationTimer() {
+            /**
+            * Este metodo se encarga del metodo que cuenta las bombas marcadas junto con el total de bombas que hay en tablero genereado automaticamente.
+            * Además, de iniciacilizar la lógica para el cronometro y mostrarlo en la interfaz.
+            */
             @Override
             public void handle(long now) {
                 Duration duration = Duration.between(startTime, Instant.now());
@@ -370,9 +460,16 @@ public class DummyLevel extends Application{
                         }
                     }
                     if (allOpened) {
-                        System.out.println("You won!");
-                        // Stop the timer when the user wins
+                        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                        alert.setTitle("You Win!");
+                        alert.setHeaderText("¡Haz ganado!");
+                        alert.setContentText("¡Abriste todas las celdas sin explotar una bomba");
+                        alert.showAndWait();
+                        // Para el contador del tiempo cuando el usuario gane
                         this.stop();
+                        
+                        //Detener el juego
+                        Platform.exit();
                     }
                 }
             }
@@ -381,6 +478,12 @@ public class DummyLevel extends Application{
         stage.show();
     }
 
+    
+    /**
+    * Este metodo le da inicio al program en su totailidad 
+    * @param args son los argumentos necesarios para la ejecución del programa
+    * no son utilizados explicitamente
+    */
     public static void main(String[] args){
         launch(args);
         

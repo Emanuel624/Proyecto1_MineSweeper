@@ -1,3 +1,7 @@
+/**
+ * @author Emanuel Chavarría Hernández 2022205841
+ * @version 1.0
+ */
 import java.awt.AWTException;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -6,11 +10,18 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 
-
+/**
+ * Esta clase representa el main del programa, en ella se ejecuta 
+ * el programa para sumar edades de personas creadas, por medio de JavaFx
+ */
 public class Main extends Application{
     
-               
-    //Analizar bien este codigo, es clave.
+    
+    /**
+     * @param primaryStage es la interfaz principal del programa
+     * @throws Exception si ocurre un error al generar la interfaz del programa
+     * Ademas se añaden los botones y sus funcionalidades para entrar a los diversos niveles del juego "MineSweeper"
+     */
     @Override
     public void start(Stage primaryStage) throws Exception {
         // Crear botones para las diferentes dificultades
@@ -63,7 +74,11 @@ public class Main extends Application{
         primaryStage.show();
     }
 
-
+        /**
+        * Este metodo le da inicio al program en su totailidad 
+        * @param args son los argumentos necesarios para la ejecución del programa
+        * no son utilizados explicitamente
+        */
         public static void main(String[] args){
             new Thread(() -> {
                 Application.launch(Main.class);

@@ -1,3 +1,7 @@
+/**
+ * Esta clase se encarga de realizar la comunicación serial por medio de JserialComms de arduino con java
+ * Con el objetivo de los valores de un joystick en los ejes "y" y "x" se utilicen para dar comandos con teclas del teclado para ser utlizado despues.
+ */
 
 import com.fazecast.jSerialComm.*;
 import java.awt.AWTException;
@@ -9,15 +13,23 @@ import java.io.InputStream;
 
 
 public class Controlador {
-
+    /**
+    * Este metodo le da inicio al program en su totailidad 
+    * @param args son los argumentos necesarios para la ejecución del programa
+    * no son utilizados explicitamente
+    */
     public static void main(String[] args) {
         Thread serialThread = new Thread(Controlador::startSerialCommunication);
         serialThread.start();
 
     }
-
+    
+    /**
+     * Este metodo se encarga de la lógica en bruto de la comunicación entre el Arduino y java
+     * por medio ed envio y recibimiento de bits pre-establecidos.
+     */
     private static void startSerialCommunication() {
-        SerialPort serialPort = SerialPort.getCommPort("COM6"); // Reemplaza COM3 por el puerto de tu Arduino
+        SerialPort serialPort = SerialPort.getCommPort("COM6"); //Comunicación con el puerto utilizado por el arduino
         serialPort.setComPortParameters(9600, 8, 1, SerialPort.NO_PARITY);
         serialPort.openPort();
         InputStream inputStream = serialPort.getInputStream();
@@ -67,7 +79,7 @@ public class Controlador {
         } catch (AWTException | IOException | NumberFormatException e) {
             e.printStackTrace();
         } finally {
-            serialPort.closePort();
+            serialPort.closePort(); //Se termina la conexión entre arduino y java
         }
     }
 }
