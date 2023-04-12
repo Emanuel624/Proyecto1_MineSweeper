@@ -74,7 +74,7 @@ public class Solitario extends Application{
          * @throws AWTException si ocurre un error al generar la interfaz del programa.AWTException
          */
         
-        //Lógica basica detras del juego.
+        //Lógica basica detrás del juego.
         Parent createContent() throws AWTException{
             Pane root = new Pane();
 
