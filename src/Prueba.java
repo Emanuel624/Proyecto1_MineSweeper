@@ -7,6 +7,7 @@ import java.awt.AWTException;
 import java.awt.Robot;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -68,6 +69,8 @@ public class Prueba extends Application{
         
         LinkedList lista = new LinkedList();
         
+        private Stack<Tile> sugerencias = new Stack<>();
+        
         /**
          * @return devuelve al stackPane todos los diversos elementos añadidos a la GUI para luego ser utilizados en diversas funciones del programa. 
          * @throws AWTException si ocurre un error al generar la interfaz del programa.AWTException
@@ -127,7 +130,33 @@ public class Prueba extends Application{
             PilaSugenrencias.setText("Pila sugerencias");
             PilaSugenrencias.setTranslateX(-240);
             PilaSugenrencias.setTranslateY(50);
-  
+            PilaSugenrencias.setOnAction(e -> {
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setTitle("Pila de sugerencias");
+                alert.setHeaderText(null);
+                if (sugerencias.isEmpty()) {
+                    alert.setContentText("La pila de sugerencias está vacía.");
+                } else {
+                    Object[] sugerenciasArray = sugerencias.toArray();
+                    String content = "";
+                    for (Object obj : sugerenciasArray) {
+                        Tile tile = (Tile) obj;
+                        content += "(" + tile.x + ", " + tile.y + ")\n";
+                    }
+                    alert.setContentText(content);
+                    ButtonType seleccionarButton = new ButtonType("Seleccionar");
+                    alert.getButtonTypes().add(seleccionarButton);
+                    Optional<ButtonType> result = alert.showAndWait();
+                    if (result.isPresent() && result.get() == seleccionarButton) {
+                        Tile ultimaSugerencia = sugerencias.peek();
+                        ultimaSugerencia.border.setStroke(Color.AQUAMARINE);
+                        ultimaSugerencia.border.setStrokeWidth(4);
+                        ultimaSugerencia.open();
+                    }
+                }
+            });
+
+
 
             //Colocar items en la GUI
             StackPane stackPane = new StackPane(root, timeElapsed, JoyStick, PilaSugenrencias);
@@ -230,6 +259,11 @@ public class Prueba extends Application{
                         }
                         jugadas++;
                         
+                        //Se agregan el contador necesario de las jugadas realizadas por el usario 
+                        if (jugadas % 5 == 0) {
+                            agregarSugerencia();
+                        }
+                        
                     }
 
                     //Lógica para contar la cantidad de bombas que se han marcado y las que faltan
@@ -259,6 +293,34 @@ public class Prueba extends Application{
              * Este metodo se encarga de recorrer el tablero de juego o grid para dar las sugerencias pertinenetes con las especificaciones pedidas
              * es decir que sean celdas sin bombas.
              */
+            private void agregarSugerencia() {
+                Stack<Tile> tiles = new Stack<>();
+                for (int Y = 0; Y < Y_TILE; Y++) {
+                    for (int X = 0; X < X_TILE; X++) {
+                        Tile tile = grid[X][Y];
+                        if (!tile.hasBomb && !tile.isOpen) {
+                            tiles.push(tile);
+                        }
+                    }
+                }
+                if (!tiles.isEmpty()) {
+                    Tile sugerencia = tiles.peek();
+                    if (!sugerencias.isEmpty()) {
+                        Tile ultimaSugerencia = sugerencias.peek();
+                        while (sugerencia.x == ultimaSugerencia.x && sugerencia.y == ultimaSugerencia.y) {
+                            tiles.pop();
+                            if (tiles.isEmpty()) {
+                                break;
+                            }
+                            sugerencia = tiles.peek();
+                        }
+                    }
+                    sugerencias.push(sugerencia);
+                }
+            }
+
+
+
 
             
             /**

@@ -3,13 +3,11 @@
  * en la cual se tiene el juego MineSweeper en su forma tradicional es decir para jugar solo.
  */
 import java.awt.AWTException;
+
 import java.awt.Robot;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.Stack;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -17,7 +15,6 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.animation.AnimationTimer;
 import static javafx.application.Application.launch;
-import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -31,6 +28,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+
+
 
 
 public class Solitario extends Application{
@@ -65,9 +64,12 @@ public class Solitario extends Application{
         
         
         //Stack de sugerencias
-        private Stack<Tile> sugerencias = new Stack<>();
+        
         private int jugadas = 0;
-
+        
+        LinkedList lista = new LinkedList();
+        
+        private Stack<Tile> sugerencias = new Stack<>();
         
         /**
          * @return devuelve al stackPane todos los diversos elementos añadidos a la GUI para luego ser utilizados en diversas funciones del programa. 
@@ -135,8 +137,10 @@ public class Solitario extends Application{
                 if (sugerencias.isEmpty()) {
                     alert.setContentText("La pila de sugerencias está vacía.");
                 } else {
+                    Object[] sugerenciasArray = sugerencias.toArray();
                     String content = "";
-                    for (Tile tile : sugerencias) {
+                    for (Object obj : sugerenciasArray) {
+                        Tile tile = (Tile) obj;
                         content += "(" + tile.x + ", " + tile.y + ")\n";
                     }
                     alert.setContentText(content);
@@ -152,6 +156,8 @@ public class Solitario extends Application{
                 }
             });
 
+
+
             //Colocar items en la GUI
             StackPane stackPane = new StackPane(root, timeElapsed, JoyStick, PilaSugenrencias);
             stackPane.setPrefSize(800, 600);
@@ -165,18 +171,18 @@ public class Solitario extends Application{
          * @param tile utilizado para generar el tablero de juego juntos con sus bombas aleatoriamente creadas o sin bombas asociadas a la Tile.
          * @return se retorna la información necesarias para saber que una celda reconozca que tiene bombas alrededor suyo para despues ser utilizado.
          */
-        private List<Tile> getNeighbors(Tile tile){
-            List<Tile> neighbors = new ArrayList<>();
+        private LinkedList<Tile> getNeighbors(Tile tile){
+            LinkedList<Tile> neighbors = new LinkedList<>();
 
             int[] points = new int[]{
-                -1, -1,
-                -1, 0,
-                -1, 1,
-                0, -1,
-                0, 1,
-                1, -1,
-                1, 0,
-                1, 1   
+                    -1, -1,
+                    -1, 0,
+                    -1, 1,
+                    0, -1,
+                    0, 1,
+                    1, -1,
+                    1, 0,
+                    1, 1
             };
 
             for (int i = 0; i < points.length; i++){
@@ -194,6 +200,9 @@ public class Solitario extends Application{
 
             return neighbors;
         }
+
+
+
 
         /**
          * Esta clase privada se encarga de reconocer diferentes parametros del juego tales como:
@@ -250,12 +259,11 @@ public class Solitario extends Application{
                         }
                         jugadas++;
                         
-                        
                         //Se agregan el contador necesario de las jugadas realizadas por el usario 
                         if (jugadas % 5 == 0) {
                             agregarSugerencia();
                         }
-
+                        
                     }
 
                     //Lógica para contar la cantidad de bombas que se han marcado y las que faltan
@@ -286,48 +294,64 @@ public class Solitario extends Application{
              * es decir que sean celdas sin bombas.
              */
             private void agregarSugerencia() {
-                List<Tile> tiles = new ArrayList<>();
+                Stack<Tile> tiles = new Stack<>();
                 for (int Y = 0; Y < Y_TILE; Y++) {
                     for (int X = 0; X < X_TILE; X++) {
                         Tile tile = grid[X][Y];
                         if (!tile.hasBomb && !tile.isOpen) {
-                            tiles.add(tile);
+                            tiles.push(tile);
                         }
                     }
                 }
                 if (!tiles.isEmpty()) {
-                    Tile sugerencia = tiles.get((int) (Math.random() * tiles.size()));
+                    Tile sugerencia = tiles.peek();
                     if (!sugerencias.isEmpty()) {
                         Tile ultimaSugerencia = sugerencias.peek();
                         while (sugerencia.x == ultimaSugerencia.x && sugerencia.y == ultimaSugerencia.y) {
-                            sugerencia = tiles.get((int) (Math.random() * tiles.size()));
+                            tiles.pop();
+                            if (tiles.isEmpty()) {
+                                break;
+                            }
+                            sugerencia = tiles.peek();
                         }
                     }
                     sugerencias.push(sugerencia);
                 }
             }
+
+
+
+
             
             /**
              * Es metodo se encarga de la lógica necesaria para "abrir" las celdas del tablero de juego
              */
-            public void open(){
-                if (isOpen)
-                    return;   
 
+            public void open() {
+                if (isOpen) {
+                    return;
+                }
 
-                if (hasBomb){
+                if (hasBomb) {
                     System.out.println("Haz perdido");
                 }
+
                 isOpen = true;
                 text.setVisible(true);
                 border.setFill(null);
 
-                if (text.getText().isEmpty()){
-                    getNeighbors(this).forEach(Tile::open);
-                }   
+                //Codigo que cambia para usar funciones construidos, sin usar preconstruidas.
+                if (text.getText().isEmpty()) {
+                    getNeighbors(this).forEach(new MyConsumer<Tile>() {
+                        @Override
+                        public void accept(Tile t) {
+                            t.open();
+                        }
+                    });
+                }
             }
-        }
 
+        }    
         
    /**
     * @param stage es la interfaz principal del programa de este nivel de dificultad. 

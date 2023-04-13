@@ -6,7 +6,29 @@ class LinkedList<T> {
         this.head = null;
         this.size = 0;
     }
-
+    
+    public boolean isEmpty(){
+        return this.head == null;
+    }
+    
+    public void insertFirst(T data){
+        Node newNode = new Node(data);
+        newNode.next = this.head;
+        this.head = newNode;
+        this.size++;
+    }
+    
+    public Node deleteFirst(){
+        if (this.head != null){
+            Node temp = this.head;
+            this.head = this.head.next;
+            this.size--;
+            return temp;
+        }else{
+            return null;
+        }
+    }
+    
     public void add(T data) {
         Node<T> newNode = new Node<>(data);
         if (head == null) {
@@ -28,7 +50,25 @@ class LinkedList<T> {
     public Node<T> getHead() {
         return head;
     }
+    
+        public int getSize() {
+        return size;
+    }
 
+    public T get(int index) {
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        Node<T> current = head;
+        for (int i = 0; i < index; i++) {
+            current = current.next;
+        }
+
+        return current.data;
+    }
+
+    
     public void forEach(MyConsumer<T> action) {
         Node<T> current = head;
         while (current != null) {
