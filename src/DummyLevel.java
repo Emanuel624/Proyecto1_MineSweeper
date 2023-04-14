@@ -3,13 +3,11 @@
  * En esta clase se contiene toda la lógica solicitida y necesariar para el funcionamiento de la clase
  */
 import java.awt.AWTException;
+
 import java.awt.Robot;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.Stack;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -127,6 +125,10 @@ public class DummyLevel extends Application{
             PilaSugenrencias.setText("Pila sugerencias");
             PilaSugenrencias.setTranslateX(-240);
             PilaSugenrencias.setTranslateY(50);
+            PilaSugenrencias = new Button();
+            PilaSugenrencias.setText("Pila sugerencias");
+            PilaSugenrencias.setTranslateX(-240);
+            PilaSugenrencias.setTranslateY(50);
             PilaSugenrencias.setOnAction(e -> {
                 Alert alert = new Alert(AlertType.INFORMATION);
                 alert.setTitle("Pila de sugerencias");
@@ -134,8 +136,10 @@ public class DummyLevel extends Application{
                 if (sugerencias.isEmpty()) {
                     alert.setContentText("La pila de sugerencias está vacía.");
                 } else {
+                    Object[] sugerenciasArray = sugerencias.toArray();
                     String content = "";
-                    for (Tile tile : sugerencias) {
+                    for (Object obj : sugerenciasArray) {
+                        Tile tile = (Tile) obj;
                         content += "(" + tile.x + ", " + tile.y + ")\n";
                     }
                     alert.setContentText(content);
@@ -146,7 +150,7 @@ public class DummyLevel extends Application{
                         Tile ultimaSugerencia = sugerencias.peek();
                         ultimaSugerencia.border.setStroke(Color.AQUAMARINE);
                         ultimaSugerencia.border.setStrokeWidth(4);
-                        ultimaSugerencia.open();                        
+                        ultimaSugerencia.open();
                     }
                 }
             });
@@ -164,18 +168,18 @@ public class DummyLevel extends Application{
          * @param tile utilizado para generar el tablero de juego juntos con sus bombas aleatoriamente creadas o sin bombas asociadas a la Tile.
          * @return se retorna la información necesarias para saber que una celda reconozca que tiene bombas alrededor suyo para despues ser utilizado.
          */
-        private List<Tile> getNeighbors(Tile tile){
-            List<Tile> neighbors = new ArrayList<>();
+        private LinkedList<Tile> getNeighbors(Tile tile){
+            LinkedList<Tile> neighbors = new LinkedList<>();
 
             int[] points = new int[]{
-                -1, -1,
-                -1, 0,
-                -1, 1,
-                0, -1,
-                0, 1,
-                1, -1,
-                1, 0,
-                1, 1   
+                    -1, -1,
+                    -1, 0,
+                    -1, 1,
+                    0, -1,
+                    0, 1,
+                    1, -1,
+                    1, 0,
+                    1, 1
             };
 
             for (int i = 0; i < points.length; i++){
@@ -193,7 +197,6 @@ public class DummyLevel extends Application{
 
             return neighbors;
         }
-
          /**
          * Esta clase privada se encarga de reconocer diferentes parametros del juego tales como:
          * si tiene bomba, si se abre la celda, si se marca como posible celda, colores de celda y bordes, etc.
@@ -326,26 +329,31 @@ public class DummyLevel extends Application{
              * Este metodo se encarga de recorrer el tablero de juego o grid para dar las sugerencias pertinenetes con las especificaciones pedidas
              * es decir que sean celdas sin bombas.
              */
-            private void agregarSugerencia() {
-                List<Tile> tiles = new ArrayList<>();
+           private void agregarSugerencia() {
+                Stack<Tile> tiles = new Stack<>();
                 for (int Y = 0; Y < Y_TILE; Y++) {
                     for (int X = 0; X < X_TILE; X++) {
                         Tile tile = grid[X][Y];
                         if (!tile.hasBomb && !tile.isOpen) {
-                            tiles.add(tile);
+                            tiles.push(tile);
                         }
                     }
                 }
                 if (!tiles.isEmpty()) {
-                    Tile sugerencia = tiles.get((int) (Math.random() * tiles.size()));
+                    Tile sugerencia = tiles.peek();
                     if (!sugerencias.isEmpty()) {
                         Tile ultimaSugerencia = sugerencias.peek();
                         while (sugerencia.x == ultimaSugerencia.x && sugerencia.y == ultimaSugerencia.y) {
-                            sugerencia = tiles.get((int) (Math.random() * tiles.size()));
+                            tiles.pop();
+                            if (tiles.isEmpty()) {
+                                break;
+                            }
+                            sugerencia = tiles.peek();
                         }
                     }
                     sugerencias.push(sugerencia);
                 }
+                
             }
             
             /**
@@ -353,7 +361,7 @@ public class DummyLevel extends Application{
              * @return se retorna esta misma celda aleatoria
              */
             private Tile getRandomTile() {
-                List<Tile> tiles = new ArrayList<>();
+                LinkedList<Tile> tiles = new LinkedList<>();
                 for (int Y = 0; Y < Y_TILE; Y++) {
                     for (int X = 0; X < X_TILE; X++) {
                         Tile tile = grid[X][Y];
@@ -368,26 +376,33 @@ public class DummyLevel extends Application{
                 return randomTile;
             }
 
+
             
             /**
              * Es metodo se encarga de la lógica necesaria para "abrir" las celdas del tablero de juego
              */
-            public void open(){
-                if (isOpen)
-                    return;   
-
-
-                if (hasBomb){
-                    
+            public void open() {
+                if (isOpen) {
                     return;
                 }
+
+                if (hasBomb) {
+                    System.out.println("Haz perdido");
+                }
+
                 isOpen = true;
                 text.setVisible(true);
                 border.setFill(null);
 
-                if (text.getText().isEmpty()){
-                    getNeighbors(this).forEach(Tile::open);
-                }   
+                //Codigo que cambia para usar funciones construidos, sin usar preconstruidas.
+                if (text.getText().isEmpty()) {
+                    getNeighbors(this).forEach(new MyConsumer<Tile>() {
+                        @Override
+                        public void accept(Tile t) {
+                            t.open();
+                        }
+                    });
+                }
             }
         }
    

@@ -445,4 +445,3 @@ public class Solitario extends Application{
 }
 
 
-

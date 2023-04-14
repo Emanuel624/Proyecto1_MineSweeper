@@ -1,7 +1,15 @@
-
+/**
+ * Esta clase se encarga de enviar los Bits necesarios para comunicar al Arudino con Java y su funcionalidad con el Buzzer
+ * para emitir sonidos al abrir una celda con o sin bomba.
+ */
 import com.fazecast.jSerialComm.*;
 
 public class Buzzer {
+    /**
+    * Este metodo le da inicio al program en su totailidad 
+    * @param args son los argumentos necesarios para la ejecución del programa
+    * no son utilizados explicitamente
+    */
     public static void main(String[] args) {
         SerialPort[] ports = SerialPort.getCommPorts();
         SerialPort port = ports[0]; // selecciona el primer puerto serie disponible

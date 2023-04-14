@@ -6,12 +6,8 @@ import java.awt.AWTException;
 import java.awt.Robot;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Stack;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -33,7 +29,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
-
 
 
 public class AdvanceLevel extends Application{
@@ -143,8 +138,10 @@ public class AdvanceLevel extends Application{
                 if (sugerencias.isEmpty()) {
                     alert.setContentText("La pila de sugerencias está vacía.");
                 } else {
+                    Object[] sugerenciasArray = sugerencias.toArray();
                     String content = "";
-                    for (Tile tile : sugerencias) {
+                    for (Object obj : sugerenciasArray) {
+                        Tile tile = (Tile) obj;
                         content += "(" + tile.x + ", " + tile.y + ")\n";
                     }
                     alert.setContentText(content);
@@ -171,23 +168,20 @@ public class AdvanceLevel extends Application{
                         availableCells.add(tile);
                     }
                 }
-            }
-            // Imprimir el estado de la lista enlazada en la consola
-            System.out.println("Lista general sin modificaciones:");
-            for (Tile tile : availableCells) {
-                System.out.println(tile);
-            }
+                // Imprimir la lista completa en la consola al inciar la aplicación
+                System.out.println("Lista general completa:");
+                Node<Tile> current = availableCells.getHead();
+                while (current != null) {
+                    System.out.println(current.getData());
+                    current = current.getNext();
+                }
+                System.out.println("Lista segura:");
+                listaSegura.displayList();   
+                System.out.println("Lista de incertidumbre:");
+                listaIncertidumbre.displayList();
+            }   
             
-            // Imprimir el estado de las listas segura e incertidumbre en la consola
-            System.out.println("Lista segura:");
-            for (Tile tile : listaSegura) {
-                System.out.println(tile);
-            }
-
-            System.out.println("Lista incertidumbre:");
-                for (Tile tile : listaIncertidumbre) {
-                    System.out.println(tile);
-            }
+ 
             
             //Colocar items en la GUI
             StackPane stackPane = new StackPane(root, timeElapsed, JoyStick, PilaSugenrencias);
@@ -202,18 +196,18 @@ public class AdvanceLevel extends Application{
         * @param tile utilizado para generar el tablero de juego juntos con sus bombas aleatoriamente creadas o sin bombas asociadas a la Tile.
         * @return se retorna la información necesarias para saber que una celda reconozca que tiene bombas alrededor suyo para despues ser utilizado.
         */
-        private List<Tile> getNeighbors(Tile tile){
-            List<Tile> neighbors = new ArrayList<>();
+        private LinkedList<Tile> getNeighbors(Tile tile){
+            LinkedList<Tile> neighbors = new LinkedList<>();
 
             int[] points = new int[]{
-                -1, -1,
-                -1, 0,
-                -1, 1,
-                0, -1,
-                0, 1,
-                1, -1,
-                1, 0,
-                1, 1   
+                    -1, -1,
+                    -1, 0,
+                    -1, 1,
+                    0, -1,
+                    0, 1,
+                    1, -1,
+                    1, 0,
+                    1, 1
             };
 
             for (int i = 0; i < points.length; i++){
@@ -307,51 +301,70 @@ public class AdvanceLevel extends Application{
                         // Lógica todas las celdas disponibles que no estan abiertas se meten dentro de la lista enlazada 
                         // eliminar las celdas abiertas de la lista de celdas disponibles
                         
+                        // Declarar la lista enlazada
+                        LinkedList<Tile> availableCells = new LinkedList<>();
+
+                        // Agregar elementos a la lista enlazada
                         for (int j = 0; j < Y_TILE; j++) {
                             for (int i = 0; i < X_TILE; i++) {
                                 Tile tile = grid[i][j];
-                                if (tile.isOpen|| tile.text.isVisible())  {
+                                availableCells.add(tile);
+                            }
+                        }
+
+                        // Crear una lista para almacenar celdas abiertas
+                        LinkedList<Tile> celdasAbiertas = new LinkedList<>();
+
+                        // Agregar celdas abiertas a la lista
+                        for (int j = 0; j < Y_TILE; j++) {
+                            for (int i = 0; i < X_TILE; i++) {
+                                Tile tile = grid[i][j];
+                                if (tile.isOpen || tile.text.isVisible()) {
                                     celdasAbiertas.add(tile);
                                 }
                             }
                         }
-                        availableCells.removeAll(celdasAbiertas);
 
-                                                
-                        
+                        // Eliminar celdas abiertas de la lista disponible
+                        Node<Tile> current = celdasAbiertas.getHead();
+                        while (current != null) {
+                            availableCells.remove(current.getData());
+                            current = current.getNext();
+                        }
+
+ 
                         // Generar un índice aleatorio para acceder a una celda de availableCells
                         Random rand = new Random();
                         int randomIndex = rand.nextInt(availableCells.size());
                         Tile randomTile = availableCells.get(randomIndex);
-
+                        availableCells.remove(randomTile); // Eliminar la celda seleccionada de la lista
+                        
+                        // Imprimir el estado de la lista enlazada en la consola
+                        System.out.println("Lista general sin modificaciones:");
+                        Node<Tile> current2 = availableCells.getHead();
+                        while (current2 != null) {
+                            System.out.println(current2.getData());
+                            current2 = current2.getNext();
+                        }
+                        
                         // Determinar si hay una mina en la celda aleatoria
                         if (randomTile.hasBomb) {
                             listaIncertidumbre.add(randomTile);
+                            System.out.println("Lista segura:");
+                            listaSegura.displayList();
+                            System.out.println("Lista de incertidumbre:");
+                            listaIncertidumbre.displayList();
                             
                         } else {
                             listaSegura.add(randomTile);
-                            
+                            System.out.println("Lista segura:");
+                            listaSegura.displayList();
+                            System.out.println("Lista de incertidumbre:");
+                            listaIncertidumbre.displayList();
                         }
                         availableCells.remove(randomTile);
                         
-                        // Imprimir el estado de la lista enlazada en la consola
-                        System.out.println("Lista general:");
-                        for (Tile tile : availableCells) {
-                            System.out.println(tile);
-                        }
-                        
-                        // Imprimir el estado de las listas segura e incertidumbre en la consola
-                        System.out.println("Lista segura:");
-                        for (Tile tile : listaSegura) {
-                            System.out.println(tile);
-                        }
-
-                        System.out.println("Lista incertidumbre:");
-                        for (Tile tile : listaIncertidumbre) {
-                            System.out.println(tile);
-                        }
-                        
-                        
+                                                
                         // Seleccionar la siguiente celda a abrir
                         Tile nextTile = null;
                         if (!listaSegura.isEmpty()) {
@@ -437,21 +450,25 @@ public class AdvanceLevel extends Application{
              * es decir que sean celdas sin bombas.
              */    
             private void agregarSugerencia() {
-                List<Tile> tiles = new ArrayList<>();
+                Stack<Tile> tiles = new Stack<>();
                 for (int Y = 0; Y < Y_TILE; Y++) {
                     for (int X = 0; X < X_TILE; X++) {
                         Tile tile = grid[X][Y];
                         if (!tile.hasBomb && !tile.isOpen) {
-                            tiles.add(tile);
+                            tiles.push(tile);
                         }
                     }
                 }
                 if (!tiles.isEmpty()) {
-                    Tile sugerencia = tiles.get((int) (Math.random() * tiles.size()));
+                    Tile sugerencia = tiles.peek();
                     if (!sugerencias.isEmpty()) {
                         Tile ultimaSugerencia = sugerencias.peek();
                         while (sugerencia.x == ultimaSugerencia.x && sugerencia.y == ultimaSugerencia.y) {
-                            sugerencia = tiles.get((int) (Math.random() * tiles.size()));
+                            tiles.pop();
+                            if (tiles.isEmpty()) {
+                                break;
+                            }
+                            sugerencia = tiles.peek();
                         }
                     }
                     sugerencias.push(sugerencia);
@@ -461,23 +478,31 @@ public class AdvanceLevel extends Application{
              /**
              * Es metodo se encarga de la lógica necesaria para "abrir" las celdas del tablero de juego
              */
-            public void open(){
-                if (isOpen)
-                    return;   
-
-
-                if (hasBomb){
+            public void open() {
+                if (isOpen) {
                     return;
                 }
+
+                if (hasBomb) {
+                    return;
+                }
+
                 isOpen = true;
                 text.setVisible(true);
                 border.setFill(null);
 
-                if (text.getText().isEmpty()){
-                    getNeighbors(this).forEach(Tile::open);
-                }   
+                //Codigo que cambia para usar funciones construidos, sin usar preconstruidas.
+                if (text.getText().isEmpty()) {
+                    getNeighbors(this).forEach(new MyConsumer<Tile>() {
+                        @Override
+                        public void accept(Tile t) {
+                            t.open();
+                        }
+                    });
+                }
             }
-        }
+
+        }  
    
     
     /**
