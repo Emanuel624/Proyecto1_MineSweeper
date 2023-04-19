@@ -1,9 +1,10 @@
+
+import com.fazecast.jSerialComm.*;
+
 /**
  * Esta clase se encarga de enviar los Bits necesarios para comunicar al Arudino con Java y su funcionalidad con el Buzzer
  * para emitir sonidos al abrir una celda con o sin bomba.
  */
-import com.fazecast.jSerialComm.*;
-
 public class Buzzer {
     /**
     * Este metodo le da inicio al program en su totailidad 

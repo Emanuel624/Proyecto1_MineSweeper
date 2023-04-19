@@ -2,7 +2,7 @@
  * Esta clase LinkedList es la implementación desde 0 de la estructura de datos "Lista enlazada" sin utilizar implementación ya creadas en Java.
  * @param <T> este parametro, permite recibir parametros estandar y agregarlos a esta clase de lista enlazada, sin esto, no podrían agregarse datos de clases externas a esta.
  */
-class LinkedList<T> {
+public class LinkedList<T> {
     Node<T> head;
     int size;
 
@@ -15,6 +15,7 @@ class LinkedList<T> {
     }
     
     /**
+     * Se verifica si la la lista esta vacia
      * @return se encarga de verificar si la lista enlzada esta vacia, revisando la cabeza de la misma.
      */
     public boolean isEmpty(){
@@ -22,6 +23,7 @@ class LinkedList<T> {
     }
     
     /**
+     * Añade el dato como primero en la lista Enlazada.
      * @param data, en este caso, se inserta en el primer espacio de la lista enlazada el parametro estandar recogido de otra clase, se tiene la logica para poder realizar esta acción. 
      */
     public void insertFirst(T data){
@@ -32,6 +34,7 @@ class LinkedList<T> {
     }
     
     /**
+     * Este node elemina el primer dato de la lista.
      * @return, como su contra parte anterior, se encarga de eliminar el primer elemento de la lista enlazada,tiene la lógica necesaria para dicha acción.
      */
     public Node<T> deleteFirst(){
@@ -46,6 +49,7 @@ class LinkedList<T> {
     }
     
     /**
+     * Este boolean realiza la comparación para revisar si el dato está o no en la lista.
      * @param data se utiliza el parametro obtenido de otra clase, para poder realizar la comprobación de datos dentro de la lista enlazada.
      * @return se retorna un elemento Booleano, para conocer si se encuentra o no el elemento de data deseado.
      */
@@ -72,6 +76,7 @@ class LinkedList<T> {
     }
     
     /**
+     * Añade un elemento a la lista.
      * @param data este parametro, es utilizado para realizar el metodo publico de añadir elementos externos a esta clase a la lista enlazada, el data es la información que se va a añadir.
      */
     public void add(T data) {
@@ -89,6 +94,7 @@ class LinkedList<T> {
     }
     
     /**
+     * Añade todos los elementos de una lista a otra.
      * @param otherList este metodo publiclo, permite unir 2 listas enlazadas de manera completa, mediante un unico metodo.
      */
     public void addAll(LinkedList<T> otherList) {
@@ -108,6 +114,7 @@ class LinkedList<T> {
     }
     
     /**
+     * Devuelve un valor entero con el tamaño de la lista.
      * @return se retorna el tamaño que posee la lista enlazada.
      */
     public int size() {
@@ -115,6 +122,7 @@ class LinkedList<T> {
     }
     
     /**
+     * Permite conocer el dato que se encuentra en la cabeza de la lista enlazada.
      * @return se retorna el parametro que se encuentra en la cabeza de la lista enlazada como tal.
      */
     public Node<T> getHead() {
@@ -153,6 +161,7 @@ class LinkedList<T> {
     }
     
     /**
+    *Transmite datos. 
     *Retorna un MyStream<T> que permite realizar operaciones de transmisión de datos en la lista enlazada.
     *@return Un MyStream<T> que permite realizar operaciones de transmisión de datos en la lista enlazada.
     */

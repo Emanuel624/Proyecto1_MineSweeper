@@ -1,7 +1,4 @@
-/**
- * @author Emanuel Chavarría Hernández 2022205841
- * @version 1.0
- */
+
 import java.awt.AWTException;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -11,8 +8,13 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 
 /**
- * Esta clase representa el main del programa, en ella se ejecuta 
- * el programa para sumar edades de personas creadas, por medio de JavaFx
+ * @author Emanuel Chavarría Hernández 2022205841
+ * @version 1.0
+ */
+
+/**
+ * Esta clase presenta el Main del programa, en el cual presenta un menú muy simple con 3 botones el cual
+ * permite escoger la dificultad del juego.
  */
 public class Main extends Application{
     

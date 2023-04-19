@@ -19,6 +19,10 @@ public class Stack<T> {
         this.stackList.insertFirst(newElement);
     }
     
+    /**
+    *Elimina y devuelve el elemento superior de la pila.
+    *@return el elemento superior que fue eliminado de la pila
+    */
     public T pop(){
         return this.stackList.deleteFirst().data;
     }

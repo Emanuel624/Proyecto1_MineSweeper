@@ -1,7 +1,4 @@
-/**
- * Esta clase se encarga de realizar la comunicación serial por medio de JserialComms de arduino con java
- * Con el objetivo de los valores de un joystick en los ejes "y" y "x" se utilicen para dar comandos con teclas del teclado para ser utlizado despues.
- */
+
 
 import com.fazecast.jSerialComm.*;
 import java.awt.AWTException;
@@ -11,7 +8,10 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.InputStream;
 
-
+/**
+ * Esta clase se encarga de realizar la comunicación serial por medio de JserialComms de arduino con java
+ * Con el objetivo de los valores de un joystick en los ejes "y" y "x" se utilicen para dar comandos con teclas del teclado para ser utlizado despues.
+ */
 public class Controlador {
     /**
     * Este metodo le da inicio al program en su totailidad 

@@ -1,7 +1,4 @@
-/**
- * La clase "Solitario" representa una dificultada extra de la solicitadas
- * en la cual se tiene el juego MineSweeper en su forma tradicional es decir para jugar solo.
- */
+
 import java.awt.AWTException;
 
 import java.awt.Robot;
@@ -30,8 +27,10 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
 
-
-
+/**
+ * La clase "Solitario" representa una dificultada extra de la solicitadas
+ * en la cual se tiene el juego MineSweeper en su forma tradicional es decir para jugar solo.
+ */
 public class Solitario extends Application{
     
         //Escala del tablero por generar

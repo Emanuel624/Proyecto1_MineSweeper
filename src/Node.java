@@ -3,7 +3,7 @@
  * creadas desde 0.
  * @param <T>  este parametro, permite que esta clase, reciba parametros dentro de los nodos, para poder agregar elementos desde otras clases externas a esta.
  */
-class Node<T> {
+public class Node<T> {
     T data;     //Para permitir lectura de parametros estandar
     Node<T> next;   //Apuntar al siguiente nodo 
     

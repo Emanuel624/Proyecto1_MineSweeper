@@ -1,7 +1,4 @@
-/**
- * Esta clase se encarga de tener un juego MineSweeper en el cual el computador escoge celdas de forma aletario
- * En esta clase se contiene toda la lógica solicitida y necesariar para el funcionamiento de la clase
- */
+
 import java.awt.AWTException;
 
 import java.awt.Robot;
@@ -30,7 +27,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
-
+/**
+ * Esta clase se encarga de tener un juego MineSweeper en el cual el computador escoge celdas de forma aletario
+ * En esta clase se contiene toda la lógica solicitida y necesariar para el funcionamiento de la clase
+ */
 public class DummyLevel extends Application{
     
         //Escala del tablero por generar

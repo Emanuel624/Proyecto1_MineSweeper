@@ -1,9 +1,10 @@
+
+import com.fazecast.jSerialComm.*;
+
 /**
  * Esta clase de la comunicación serial por medio de jSerialComm entre Java y Arduino
  * para encender la LED cuando se ponga una bandera en el tablero de juego.
  */
-import com.fazecast.jSerialComm.*;
-
 public class LED {
     /**
     * Este metodo le da inicio al program en su totailidad 

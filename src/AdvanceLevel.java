@@ -1,7 +1,4 @@
-/**
- * Esta clase se encarga de tener un juego MineSweeper en el cual el computador obtenga una lista enlazada de todas las celdas disponibles de juego
- * y las clasifique en las celdas segura e incertidumbre para decidir que tipo de celda abrir.
- */
+
 import java.awt.AWTException;
 import java.awt.Robot;
 import java.time.Duration;
@@ -30,7 +27,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
-
+/**
+ * Esta clase se encarga de tener un juego MineSweeper en el cual el computador obtenga una lista enlazada de todas las celdas disponibles de juego
+ * y las clasifique en las celdas segura e incertidumbre para decidir que tipo de celda abrir.
+ */
 public class AdvanceLevel extends Application{
     
         //Escala del tablero por generar
@@ -506,6 +506,7 @@ public class AdvanceLevel extends Application{
    
     
     /**
+     * Ayuda al inicio de la GUI por medio JavaFx
     * @param stage es la interfaz principal del programa de este nivel de dificultad. 
     * @throws Exception si ocurre un error al generar la interfaz del programa se utiliza este excepción.
     */  
